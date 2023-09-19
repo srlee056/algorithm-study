@@ -1,3 +1,5 @@
+#  정규식 문제 더 풀어본 이후에 다시 풀러 올 것
+
 def checkStringFormat(s):
     if (len(s) < 4) or (not s.startswith('100')) or (not s.endswith('1')):
         return False
