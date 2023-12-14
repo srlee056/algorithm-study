@@ -1,6 +1,3 @@
-from collections import Counter
-
-
 def main():
     num_of_students = int(input())
 
