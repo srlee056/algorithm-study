@@ -1,5 +1,3 @@
-from collections import deque
-
 
 def process_elements(funcs, elements, is_reversed):
     left, right = 0, len(elements) - 1
@@ -36,7 +34,7 @@ def main():
         else:
             elements = []
 
-        print(process_elements(deque(funcs), elements, False))
+        print(process_elements(funcs, elements, False))
 
 
 if __name__ == "__main__":
