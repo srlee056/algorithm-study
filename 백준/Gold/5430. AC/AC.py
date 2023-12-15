@@ -1,4 +1,3 @@
-
 def process_elements(funcs, elements, is_reversed):
     left, right = 0, len(elements) - 1
 
@@ -14,11 +13,9 @@ def process_elements(funcs, elements, is_reversed):
     if left > right + 1:
         return "error"
     else:
-        result = (
-            list(reversed(elements[left : right + 1]))
-            if is_reversed
-            else elements[left : right + 1]
-        )
+        result = elements[left : right + 1]
+        if is_reversed: result.reverse()
+        
         return "[" + ",".join(map(str, result)) + "]"
 
 
