@@ -1,28 +1,30 @@
 import sys
 
-n = int(sys.stdin.readline())
 
-numbers = []
+def is_prime(n):
+    if n <= 1:
+        return False
+
+    for i in range(2, int(n ** (1 / 2)) + 1):
+        if n % i == 0:
+            return False
+    return True
 
 
-numbers = map(int, sys.stdin.readline().split())
+def main():
+    n = int(sys.stdin.readline())
 
-# print(numbers)
+    numbers = map(int, sys.stdin.readline().split())
 
-# 1. 1000 이하의 소수 리스트를 생성해두고, 이 안에 존재하는지 확인한다.
-# 2. 1000 이하의 소수라면, 31 이하의 소수로 나누어져야 한다.
+    # 2. 입력받은 수 각각이 소수인지를 판단한다.
 
-prime_numbers = {1: False}
+    count = 0
+    for num in numbers:
+        if is_prime(num):
+            count += 1
 
-for i in range(2, 1001):
-    if i not in prime_numbers:
-        prime_numbers[i] = True
-        for m in range(2, 1000 // i + 1):
-            prime_numbers[i * m] = False
+    print(count)
 
-count = 0
-for num in numbers:
-    if prime_numbers[num]:
-        count += 1
 
-print(count)
+if __name__ == "__main__":
+    main()
