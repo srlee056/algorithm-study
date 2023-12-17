@@ -1,28 +1,45 @@
-import sys
 from collections import deque
+import sys
 
-n = int(sys.stdin.readline())
 
+def push(x):
+    queue.append(x)
+
+
+def size():
+    print(len(queue))
+
+
+def empty():
+    print(0 if queue else 1)
+
+
+def pop():
+    print(queue.popleft() if queue else -1)
+
+
+def front():
+    print(queue[0] if queue else -1)
+
+
+def back():
+    print(queue[-1] if queue else -1)
+
+
+n = int(sys.stdin.readline().rstrip())
 queue = deque()
+command_dict = {
+    "push": push,
+    "size": size,
+    "empty": empty,
+    "pop": pop,
+    "front": front,
+    "back": back,
+}
+
 for _ in range(n):
     commands = sys.stdin.readline().rstrip().split()
-
     if commands[0] == "push":
-        queue.append(commands[1])
-    elif commands[0] == "size":
-        print(len(queue))
-    elif commands[0] == "empty":
-        if len(queue):
-            print(0)
-        else:
-            print(1)
+        command_dict[commands[0]](commands[1])
     else:
-        if len(queue):
-            if commands[0] == "pop":
-                print(queue.popleft())
-            elif commands[0] == "front":
-                print(queue[0])
-            elif commands[0] == "back":
-                print(queue[-1])
-        else:
-            print(-1)
+        command_dict[commands[0]]()
