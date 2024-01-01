@@ -3,30 +3,29 @@ import sys
 num_of_computers = int(sys.stdin.readline())
 num_of_networks = int(sys.stdin.readline())
 
-networks = []
+# 각 컴퓨터마다 연결된 컴퓨터를 저장할 set() 변수를 생성
+# 입력으로 받는 컴퓨터 번호는 0이 아니라 1부터 시작하므로, range를 다음과 같이 설정
+networks = [set() for _ in range(num_of_computers + 1)]
 
 for _ in range(num_of_networks):
     v1, v2 = map(int, sys.stdin.readline().split())
-    networks.append([v1, v2])
-    networks.append([v2, v1])
+    networks[v1].add(v2)
+    networks[v2].add(v1)
 
-# print(networks)
+# 방문한 컴퓨터를 저장할 변수와, 방문 할 컴퓨터를 저장할 변수를 각각 생성
+visited_computers = set()
 
-is_visited = {i + 1: False for i in range(num_of_computers)}
+computers_to_visit = [1]
 
-computers = [1]
+while computers_to_visit:
+    cur_computer = computers_to_visit.pop()
 
-while computers:
-    computer = computers.pop()
-    is_visited[computer] = True
-    for network in networks:
-        # 네트워크를 확인해서 이 컴퓨터와 연결된 다른 컴퓨터를 확인
-        # 연결된 컴퓨터가 방문한 적이 없는 경우, computers에 추가하여 이후에 네트워크를 확인
-        if network[0] == computer and not is_visited[network[1]]:
-            computers.append(network[1])
+    if cur_computer not in visited_computers:
+        visited_computers.add(cur_computer)
+        # 방문할 컴퓨터는 cur_computer와 연결되어있으면서, 방문한 적 없는 컴퓨터여야 함
+        # set operation `-` 사용하여 위 조건의 컴퓨터를 계산
+        computers_to_visit.extend(networks[cur_computer] - visited_computers)
 
-# print(is_visited)
-
-num_of_infected_computers = sum(1 for v in is_visited.values() if v) - 1
+num_of_infected_computers = len(visited_computers) - 1
 
 print(num_of_infected_computers)
