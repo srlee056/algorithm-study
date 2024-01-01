@@ -6,7 +6,6 @@ def is_blue(list):
     # check sum of all cell == L ** 2
     L = len(list)
     sum_of_all_cell = sum(sum(x) for x in list)
-    # print(sum_of_all_cell)
 
     if sum_of_all_cell == L**2:
         return True
@@ -16,9 +15,7 @@ def is_blue(list):
 
 def is_white(list):
     L = len(list)
-    # print(list)
     sum_of_all_cell = sum(sum(x) for x in list)
-    # print(sum_of_all_cell)
 
     if sum_of_all_cell == 0:
         return True
@@ -37,10 +34,6 @@ def split_table(table):
             t[2][i][j] = table[i][j + l]
             t[3][i][j] = table[i + l][j + l]
 
-    """print(t[0])
-    print(t[1])
-    print(t[2])
-    print(t[3])"""
     return t
 
 
@@ -52,14 +45,13 @@ for _ in range(n):
     row = list(map(int, sys.stdin.readline().split()))
     table.append(row)
 
-# print(table)
 tables = [table[:]]
 
 count_of_white, count_of_blue = 0, 0
 while tables:
     table = tables.pop()
     x, y = len(table), len(table[0])
-    # print(x, y, tables)
+
     if is_blue(table):
         count_of_blue += 1
     elif is_white(table):
