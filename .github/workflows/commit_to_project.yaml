@@ -70,6 +70,7 @@ jobs:
               env:
                   GH_TOKEN: ${{ secrets.ACC_TKN }}
               run: |
+                  echo "before loop"
                   git log ${{ github.event.before }}..${{ github.event.after }} --format='%H' | while read commit_hash; do
                     COMMIT_MESSAGE=$(git log -1 --format=%B $commit_hash)
                     COMMIT_DATE=$(git log -1 --format=%cd --date=format:'%Y-%m-%d' $commit_hash)
@@ -98,7 +99,7 @@ jobs:
                                     id
                                 }
                             }
-                        }' -f project=$PROJECT_ID -f issue=$ISSUE_ID --jq '.data.addProjectV2ItemById.item.id')"
+                        }' -f project=$PROJECT_ID -f issue=$ISSUE_ID --jq '.data.addProjectV2ItemById.item.id')
                       echo "ITEM_ID=$ITEM_ID" >> $GITHUB_ENV
                       echo "Update project item start"
                       # 해당 Item의 데이터 수정
