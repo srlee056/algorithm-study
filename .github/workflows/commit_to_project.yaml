@@ -11,7 +11,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
-              uses: actions/chcekout@v2
+              uses: actions/checkout@v2
               with:
                   fetch-depth: 0 # 모든 커밋을 가져오기 위해
 
