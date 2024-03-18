@@ -87,22 +87,22 @@ jobs:
                       # 각 커밋에 대해 이 부분을 실행합니다.
                       # Issue 생성
                       echo "Issue create start"
-                      issue_response=$(gh issue create --title "$COMMIT_MESSAGE" --body "Issue body content" --repo  "${GITHUB_REPOSITORY}" --assignee @me --project name "$PROJECT_NAME")
+                      issue_response=$(gh issue create --title "$COMMIT_MESSAGE" --body "Issue body content" --repo  "${GITHUB_REPOSITORY}" --assignee @me)
                       echo "Issue created with number: $issue_response"
                       echo "ISSUE_ID=$issue_response" >> $GITHUB_ENV
 
-                      
-                    #   echo "Project create start"
-                    #   # Project에 Item 생성
-                    #   ITEM_ID=$(gh api graphql -f query='
-                    #     mutation($project:ID!, $issue:ID!) {
-                    #         addProjectV2ItemById(input: {projectId: $project, contentId:$issue}) {
-                    #             item {
-                    #                 id
-                    #             }
-                    #         }
-                    #     }' -f project=$PROJECT_ID -f issue=$ISSUE_ID --jq '.data.addProjectV2ItemById.item.id')
-                    #   echo "ITEM_ID=$ITEM_ID" >> $GITHUB_ENV
+                      echo "Project create start"
+                      # Project에 Item 생성
+                      ITEM_ID=$(gh api graphql -f query='
+                        mutation($project:ID!, $issue:ID!) {
+                            addProjectV2ItemById(input: {projectId: $project, contentId:$issue}) {
+                                item {
+                                    id
+                                }
+                            }
+                        }' -f project=$PROJECT_ID -f issue=$ISSUE_ID --jq '.data.addProjectV2ItemById.item.id')
+                      echo "ITEM_ID=$ITEM_ID" >> $GITHUB_ENV
+
                       echo "Update project item start"
                       # 해당 Item의 데이터 수정
                       gh api graphql -f query='
