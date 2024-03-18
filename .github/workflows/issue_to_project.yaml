@@ -96,30 +96,29 @@ jobs:
                   # 해당 Item의 데이터 수정
                   gh api graphql -f query='
                   mutation($project:ID!, $item:ID!, $statusField:ID!, $statusValue:String!, $dateField:ID!, $dateValue:Date!) {
-
-                  updateStatus: updateProjectV2ItemFieldValue(input: {
-                      projectId: $project
-                      itemId: $item
-                      fieldId: $statusField
-                      value: {
-                          singleSelectOptionId: $statusValue
-                      }
-                      }) {
-                      projectV2Item {
-                          id
-                      }
-                  }
-                  updateDate: updateProjectV2ItemFieldValue(input: {
-                      projectId: $project
-                      itemId: $item
-                      fieldId: $dateField
-                      value: {
-                          date: $dateValue
-                      }
-                      }) {
-                      projectV2Item {
-                          id
-                      }
-                  }
-                  }' -f project=$PROJECT_ID -f item=$ITEM_ID statusField=$STATUS_FIELD_ID -f statusValue=${DONE_OPTION_ID} -f dateField=$DATE_FIELD_ID -f dateValue="${ISSUE_DATE}" --silent
+                    updateStatus: updateProjectV2ItemFieldValue(input: {
+                        projectId: $project
+                        itemId: $item
+                        fieldId: $statusField
+                        value: {
+                            singleSelectOptionId: $statusValue
+                        }
+                        }) {
+                        projectV2Item {
+                            id
+                        }
+                    }
+                    updateDate: updateProjectV2ItemFieldValue(input: {
+                        projectId: $project
+                        itemId: $item
+                        fieldId: $dateField
+                        value: {
+                            date: $dateValue
+                        }
+                        }) {
+                        projectV2Item {
+                            id
+                        }
+                    }
+                  }' -f project=$PROJECT_ID -f item=$ITEM_ID -f statusField=$STATUS_FIELD_ID -f statusValue=${DONE_OPTION_ID} -f dateField=$DATE_FIELD_ID -f dateValue="${ISSUE_DATE}" --silent
                   echo "update Done"
