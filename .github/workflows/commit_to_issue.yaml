@@ -33,7 +33,7 @@ jobs:
 
                     if [[ -z "$problem_title" ]]; then
                         echo "This commit is not by algorithm solving."
-                    else if [[ $COMMIT_TITLE == [* ]]; then
+                    elif [[ $COMMIT_TITLE == [* ]]; then
                         echo "문제: $problem_title"
                         echo "Creating issue for commit starting with ["
                         COMMITTED_FILES=$(git diff-tree --no-commit-id --name-only -r $commit_hash)
@@ -42,5 +42,5 @@ jobs:
 
                         issue_response=$(gh issue create --title "$problem_title" --body "$issue_body" --repo "${GITHUB_REPOSITORY}" --assignee @me --label "auto-generated")
                         echo "Issue created: $issue_response"
-                     fi
-                   done
+                    fi
+                  done
