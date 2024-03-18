@@ -34,15 +34,8 @@ jobs:
                         echo "문제: $problem_title"
                         echo "Creating issue for commit starting with ["
                         COMMITTED_FILES=$(git diff-tree --no-commit-id --name-only -r $commit_hash)
-                        read -r -d '' issue_body <<EOF
-This issue was automatically generated from a commit.
-
-**Commit Message:**
-$COMMIT_BODY
-
-**Committed Files:**
-$COMMITTED_FILES
-EOF
+                        # Forming the issue body with the list of changed files
+                        issue_body="This issue was automatically generated from a commit.$'\n''\n'**Commit Message:**$'\n'$COMMIT_BODY$'\n''\n'**Committed Files:**\$'n'$changed_files"
 
                         issue_response=$(gh issue create --title "$problem_title" --body "$issue_body" --repo "${GITHUB_REPOSITORY}" --assignee @me --label "auto-generated")
                         echo "Issue created: $issue_response"
