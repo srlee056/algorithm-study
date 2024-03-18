@@ -13,7 +13,6 @@ for _ in range(n - 1):
     edges[v2] = edges.get(v2, [])
     edges[v2].append(v1)
 
-# print(edges)
 parent_nodes = {1: 0}
 parents = deque([1])
 while parents:
@@ -23,8 +22,6 @@ while parents:
         if child not in parent_nodes:
             parent_nodes[child] = parent
             parents.append(child)
-
-# print(parent_nodes)
 
 for i in range(2, n + 1):
     print(parent_nodes[i])
