@@ -85,9 +85,10 @@ jobs:
                       # 각 커밋에 대해 이 부분을 실행합니다.
                       # Issue 생성
                       echo "Issue create start"
-                      issue_response=$(gh issue create --title "Issue Title" --body "Issue body content" --repo $USER/$REPO --json number -q .number)
+                      issue_response=$(gh issue create --title "$COMMIT_MESSAGE" --body "Issue body content" --repo $USER/$REPO --json number -q .number)
                       echo "Issue created with number: $issue_response"
-                      echo "ISSUE_ID=issue_response" >> $GITHUB_ENV
+                      echo "ISSUE_ID=$issue_response" >> $GITHUB_ENV
+
                       echo "Project create start"
                       # Project에 Item 생성
                       ITEM_ID=$(gh api graphql -f query='
