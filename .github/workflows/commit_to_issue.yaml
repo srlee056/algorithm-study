@@ -26,7 +26,7 @@ jobs:
                     echo "Commit Body: $COMMIT_BODY"
                     echo "Files changed in this commit: $COMMITTED_FILES"
 
-                    problem_title=$(echo "$COMMIT_TITLE" | awk -F 'Title: |, Time:' '{print $2}')
+                    problem_title=$(echo "$COMMIT_TITLE" | awk -F 'Title: |,' '{print $2}')
 
                     if [[ -z "$problem_title" ]]; then
                         echo "This commit is not by algorithm solving."
@@ -35,7 +35,7 @@ jobs:
                         echo "Creating issue for commit starting with ["
                         COMMITTED_FILES=$(git diff-tree --no-commit-id --name-only -r $commit_hash)
                         # Forming the issue body with the list of changed files
-                        issue_body="This issue was automatically generated from a commit.$'\n''\n'**Commit Message:**$'\n'$COMMIT_BODY$'\n''\n'**Committed Files:**\$'n'$changed_files"
+                        issue_body=$(echo -e "This issue was automatically generated from a commit.\n\n**Commit Message:**\n$COMMIT_BODY\n\n**Committed Files:**\n$changed_files")
 
                         issue_response=$(gh issue create --title "$problem_title" --body "$issue_body" --repo "${GITHUB_REPOSITORY}" --assignee @me --label "auto-generated")
                         echo "Issue created: $issue_response"
