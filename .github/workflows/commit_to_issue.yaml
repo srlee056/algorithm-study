@@ -19,13 +19,19 @@ jobs:
               run: |
                   git log ${{ github.event.before }}..${{ github.event.after }} --format='%H' | while read commit_hash; do
                     COMMIT_MESSAGE=$(git log -1 --format=%B $commit_hash)
+                    COMMIT_TITLE=$(echo "$COMMIT_MESSAGE" | head -n 1)
+                    COMMIT_BODY=$(echo "$COMMIT_MESSAGE" | awk '/^$/ {seen_blank=1; next} seen_blank {print}')
                     COMMIT_DATE=$(git log -1 --format=%cd --date=format:'%Y-%m-%d' $commit_hash)
-                    AUTHOR_NAME=$(git log -1 --format=%an $commit_hash)   
-                    echo "Checking commit: $COMMIT_MESSAGE"
+                    AUTHOR_NAME=$(git log -1 --format=%an $commit_hash)
+                    
+                    echo "Commit Title: $COMMIT_TITLE"
+                    echo "Commit Body: $COMMIT_BODY"
+                    echo "Commit Date: $COMMIT_DATE"
+                    echo "Author Name: $AUTHOR_NAME"
 
                     if [[ $COMMIT_MESSAGE == [* ]]; then
                         echo "Creating issue for commit starting with ["
-                        issue_response=$(gh issue create --title "$COMMIT_MESSAGE" --body "This issue was automatically generated from a commit." --repo "${GITHUB_REPOSITORY}" --assignee @me --label "auto-generated")
+                        issue_response=$(gh issue create --title "$COMMIT_TITLE" --body "This issue was automatically generated from a commit.\n$COMMIT_BODY" --repo "${GITHUB_REPOSITORY}" --assignee @me --label "auto-generated")
                         issue_number=$(echo "$issue_response" | jq -r .number)
                         echo "Issue created with number: $issue_number"
                      fi
