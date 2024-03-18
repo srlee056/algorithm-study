@@ -1,6 +1,7 @@
 import sys
 from collections import deque
 
+#input 코드를 반복할 때 간략화하는 방식
 input = sys.stdin.readline
 
 n = int(input())
