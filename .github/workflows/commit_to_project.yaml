@@ -48,11 +48,15 @@ jobs:
                   cat project_data.json
 
                   echo "PROJECT_ID=$(jq '.data.user.projectV2.id' project_data.json)" >> $GITHUB_ENV
+                  echo $PROJECT_ID
                   echo "TITLE_FIELD_ID=$(jq -r '.data.user.projectV2.fields.nodes[] | select(.name=="Title") | .id' project_data.json)" >> $GITHUB_ENV
+                  echo $TITLE_FIELD_ID
                   echo 'DATE_FIELD_ID='$(jq '.data.user.projectV2.fields.nodes[] | select(.name== "Date Solved") | .id' project_data.json) >> $GITHUB_ENV
+                  echo $DATE_FIELD_ID
                   echo 'STATUS_FIELD_ID='$(jq '.data.user.projectV2.fields.nodes[] | select(.name== "Status") | .id' project_data.json) >> $GITHUB_ENV
+                  echo $STATUS_FIELD_ID
                   echo 'DONE_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .options[] | select(.name=="Done") |.id' project_data.json) >> $GITHUB_ENV
-
+                  echo $DONE_OPTION_ID
             - name: Process each commit
               env:
                   GH_TOKEN: ${{ secrets.ACC_TKN }}
@@ -64,7 +68,8 @@ jobs:
                     echo $commit_hash
                     echo $COMMIT_MESSAGE
                     echo $COMMIT_DATE
-                    echo $AUTHOR_NAME 
+                    echo $AUTHOR_NAME
+                    echo 
                     if [[ $COMMIT_MESSAGE == [* ]]; then
                       # 환경 변수에 커밋 정보 설정
                       echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> $GITHUB_ENV
