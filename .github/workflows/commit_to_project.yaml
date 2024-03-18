@@ -11,7 +11,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v2
+              uses: actions/checkout@v4
               with:
                   fetch-depth: 0 # 모든 커밋을 가져오기 위해
 
@@ -52,6 +52,8 @@ jobs:
                   echo 'DONE_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .options[] | select(.name=="Done") |.id' project_data.json) >> $GITHUB_ENV
 
             - name: Process each commit
+              env:
+                  GH_TOKEN: ${{ secrets.ACC_TKN }}
               run: |
                   git log ${{ github.event.before }}..${{ github.event.after }} --format='%H' | while read commit_hash; do
                     COMMIT_MESSAGE=$(git log -1 --format=%B $commit_hash)
