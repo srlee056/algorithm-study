@@ -80,14 +80,15 @@ jobs:
                       echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> $GITHUB_ENV
                       echo "COMMIT_DATE=$COMMIT_DATE" >> $GITHUB_ENV
                       echo "AUTHOR_NAME=$AUTHOR_NAME" >> $GITHUB_ENV
-
+                      
                       # GitHub CLI를 사용하여 프로젝트에 커밋 정보를 추가하는 부분
                       # 각 커밋에 대해 이 부분을 실행합니다.
                       # Issue 생성
+                      echo "Issue create start"
                       issue_response=$(gh issue create --title "Issue Title" --body "Issue body content" --repo $USER/$REPO --json number -q .number)
                       echo "Issue created with number: $issue_response"
                       echo "ISSUE_ID=issue_response" >> $GITHUB_ENV
-                      
+                      echo "Project create start"
                       # Project에 Item 생성
                       ITEM_ID=$(gh api graphql -f query='
                         mutation($project:ID!, $issue:ID!) {
@@ -98,7 +99,7 @@ jobs:
                             }
                         }' -f project=$PROJECT_ID -f issue=$ISSUE_ID --jq '.data.addProjectV2ItemById.item.id')"
                       echo "ITEM_ID=$ITEM_ID" >> $GITHUB_ENV
-
+                      echo "Update project item start"
                       # 해당 Item의 데이터 수정
                       gh api graphql -f query='
                       mutation($project:ID!, $item:ID!, $titleField:ID!, $titleValue:String!, $statusField:ID!, $statusValue:String!, $dateField:ID!, $dateValue:Date!) {
