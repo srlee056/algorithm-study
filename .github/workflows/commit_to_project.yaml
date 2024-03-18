@@ -86,9 +86,10 @@ jobs:
                       # 각 커밋에 대해 이 부분을 실행합니다.
                       # Issue 생성
                       echo "Issue create start"
-                      issue_response=$(gh issue create --title "$COMMIT_MESSAGE" --body "Issue body content" --repo  "${GITHUB_REPOSITORY}" --assignee @me)
-                      echo "Issue created with number: $issue_response"
-                      echo "ISSUE_ID=$issue_response" >> $GITHUB_ENV
+                      issue_response=$(gh issue create --title "$COMMIT_MESSAGE" --body "Issue body content" --repo "${GITHUB_REPOSITORY}" --assignee @me --json number)
+                      issue_number=$(echo "$issue_response" | jq -r .number)
+                      echo "Issue created with number: $issue_number"
+                      echo "ISSUE_ID=$issue_number" >> $GITHUB_ENV
 
                       echo "Project create start"
                       # Project에 Item 생성
