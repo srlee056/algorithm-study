@@ -15,7 +15,7 @@ jobs:
                   fetch-depth: 0 # 모든 커밋을 가져오기 위해
             - name: Create Issue for Commit
               env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  GITHUB_TOKEN: ${{ secrets.ACC_TKN }}
               run: |
                   git log ${{ github.event.before }}..${{ github.event.after }} --format='%H' | while read commit_hash; do
                     COMMIT_MESSAGE=$(git log -1 --format=%B $commit_hash)
@@ -25,7 +25,7 @@ jobs:
 
                     if [[ $COMMIT_MESSAGE == [* ]]; then
                         echo "Creating issue for commit starting with ["
-                        issue_response=$(gh issue create --title "$COMMIT_MESSAGE" --body "This issue was automatically generated from a commit." --repo "${GITHUB_REPOSITORY}" --label "auto-generated")
+                        issue_response=$(gh issue create --title "$COMMIT_MESSAGE" --body "This issue was automatically generated from a commit." --repo "${GITHUB_REPOSITORY}" --assignee @me --label "auto-generated")
                         issue_number=$(echo "$issue_response" | jq -r .number)
                         echo "Issue created with number: $issue_number"
                      fi
