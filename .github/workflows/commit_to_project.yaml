@@ -74,31 +74,29 @@ jobs:
                     COMMIT_MESSAGE=$(git log -1 --format=%B $commit_hash)
                     COMMIT_DATE=$(git log -1 --format=%cd --date=format:'%Y-%m-%d' $commit_hash)
                     AUTHOR_NAME=$(git log -1 --format=%an $commit_hash)
-                    echo $commit_hash
-                    echo $COMMIT_MESSAGE
-                    echo $COMMIT_DATE
-                    echo $AUTHOR_NAME
-                    echo $TITLE_FIELD_ID
-                    echo $STATUS_FIELD_ID
-                    echo $DATE_FIELD_ID
+
                     if [[ $COMMIT_MESSAGE == [* ]]; then
                       # 환경 변수에 커밋 정보 설정
                       echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> $GITHUB_ENV
                       echo "COMMIT_DATE=$COMMIT_DATE" >> $GITHUB_ENV
                       echo "AUTHOR_NAME=$AUTHOR_NAME" >> $GITHUB_ENV
-                      echo "If passed"
+
                       # GitHub CLI를 사용하여 프로젝트에 커밋 정보를 추가하는 부분
                       # 각 커밋에 대해 이 부분을 실행합니다.
-
+                      # Issue 생성
+                      issue_response=$(gh issue create --title "Issue Title" --body "Issue body content" --repo $USER/$REPO --json number -q .number)
+                      echo "Issue created with number: $issue_response"
+                      echo "ISSUE_ID=issue_response" >> $GITHUB_ENV
+                      
                       # Project에 Item 생성
                       ITEM_ID=$(gh api graphql -f query='
-                        mutation($project:ID!) {
-                            addProjectV2Item(input: {projectId: $project}) {
+                        mutation($project:ID!, $issue:ID!) {
+                            addProjectV2ItemById(input: {projectId: $project, contentId:$issue}) {
                                 item {
                                     id
                                 }
                             }
-                        }' -f project=$PROJECT_ID --jq '.data.addProjectV2Item.item.id')
+                        }' -f project=$PROJECT_ID -f issue=$ISSUE_ID --jq '.data.addProjectV2ItemById.item.id')"
                       echo "ITEM_ID=$ITEM_ID" >> $GITHUB_ENV
 
                       # 해당 Item의 데이터 수정
