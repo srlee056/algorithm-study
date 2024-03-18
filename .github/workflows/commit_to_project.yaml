@@ -101,6 +101,7 @@ jobs:
                                 }
                             }
                         }' -f project=$PROJECT_ID -f issue=$ISSUE_ID --jq '.data.addProjectV2ItemById.item.id')
+                      echo $ITEM_ID
                       echo "ITEM_ID=$ITEM_ID" >> $GITHUB_ENV
 
                       echo "Update project item start"
