@@ -89,6 +89,19 @@ jobs:
                       echo "If passed"
                       # GitHub CLI를 사용하여 프로젝트에 커밋 정보를 추가하는 부분
                       # 각 커밋에 대해 이 부분을 실행합니다.
+
+                      # Project에 Item 생성
+                      ITEM_ID=$(gh api graphql -f query='
+                        mutation($project:ID!) {
+                            addProjectV2Item(input: {projectId: $project}) {
+                                item {
+                                    id
+                                }
+                            }
+                        }' -f project=$PROJECT_ID --jq '.data.addProjectV2Item.item.id')
+                      echo "ITEM_ID=$ITEM_ID" >> $GITHUB_ENV
+
+                      # 해당 Item의 데이터 수정
                       gh api graphql -f query='
                       mutation($project:ID!, $item:ID!, $titleField:ID!, $titleValue:String!, $statusField:ID!, $statusValue:String!, $dateField:ID!, $dateValue:Date!) {
                         updateTitle: updateProjectV2ItemFieldValue(input: {
@@ -127,7 +140,7 @@ jobs:
                                 id
                             }
                         }
-                      }' -f project=$PROJECT_ID -f item=$item_id -f titleField=$TITLE_FIELD_ID -f titleValue="${COMMIT_MESSAGE}" -f statusField=$STATUS_FIELD_ID -f statusValue=${DONE_OPTION_ID} -f dateField=$DATE_FIELD_ID -f dateValue="${COMMIT_DATE}" --silent
+                      }' -f project=$PROJECT_ID -f item=$ITEM_ID -f titleField=$TITLE_FIELD_ID -f titleValue="${COMMIT_MESSAGE}" -f statusField=$STATUS_FIELD_ID -f statusValue=${DONE_OPTION_ID} -f dateField=$DATE_FIELD_ID -f dateValue="${COMMIT_DATE}" --silent
                       echo "update Done"
                     fi
                   done
