@@ -74,7 +74,7 @@ jobs:
                     COMMIT_MESSAGE=$(git log -1 --format=%B $commit_hash)
                     COMMIT_DATE=$(git log -1 --format=%cd --date=format:'%Y-%m-%d' $commit_hash)
                     AUTHOR_NAME=$(git log -1 --format=%an $commit_hash)
-
+                    echo "before if"
                     if [[ $COMMIT_MESSAGE == [* ]]; then
                       # 환경 변수에 커밋 정보 설정
                       echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> $GITHUB_ENV
