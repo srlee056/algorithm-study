@@ -1,0 +1,32 @@
+name: Convert Commit to Issue
+on:
+    push:
+        branches:
+            - main
+    workflow_dispatch:
+
+jobs:
+    create_issue:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0 # 모든 커밋을 가져오기 위해
+            - name: Create Issue for Commit
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  git log ${{ github.event.before }}..${{ github.event.after }} --format='%H' | while read commit_hash; do
+                    COMMIT_MESSAGE=$(git log -1 --format=%B $commit_hash)
+                    COMMIT_DATE=$(git log -1 --format=%cd --date=format:'%Y-%m-%d' $commit_hash)
+                    AUTHOR_NAME=$(git log -1 --format=%an $commit_hash)   
+                    echo "Checking commit: $COMMIT_MESSAGE"
+
+                    if [[ $COMMIT_MESSAGE == [* ]]; then
+                        echo "Creating issue for commit starting with ["
+                        issue_response=$(gh issue create --title "$COMMIT_MESSAGE" --body "This issue was automatically generated from a commit." --repo "${GITHUB_REPOSITORY}" --assignee @me --label "auto-generated")
+                        issue_number=$(echo "$issue_response" | jq -r .number)
+                        echo "Issue created with number: $issue_number"
+                     fi
+                   done

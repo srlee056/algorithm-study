@@ -1,0 +1,128 @@
+# This workflow runs whenever a pull request in the repository is marked as "ready for review".
+name: Convert Issue to Project Item
+on:
+    issues:
+        types: [opened]
+    workflow_dispatch:
+
+jobs:
+    update_project:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Get project data and set up environment variables
+              env:
+                  GH_TOKEN: ${{ secrets.ACC_TKN }}
+                  USER: srlee056
+                  PROJECT_NUMBER: 6
+              run: |
+                  gh api graphql -f query='
+                    query($user: String!, $number: Int!) {
+                      user(login: $user){
+                        projectV2(number: $number) {
+                          id
+                          fields(first:20) {
+                            nodes {
+                              ... on ProjectV2Field {
+                                id
+                                name
+                              }
+                              ... on ProjectV2SingleSelectField {
+                                id
+                                name
+                                options {
+                                  id
+                                  name
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }' -f user=$USER -F number=$PROJECT_NUMBER > project_data.json
+
+                    PROJECT_ID=$(jq '.data.user.projectV2.id' project_data.json)
+                    echo "PROJECT_ID=$PROJECT_ID" >> $GITHUB_ENV
+                    echo "PROJECT_ID: $PROJECT_ID"
+                    
+                    TITLE_FIELD_ID=$(jq -r '.data.user.projectV2.fields.nodes[] | select(.name=="Title") | .id' project_data.json)
+                    echo "TITLE_FIELD_ID=$TITLE_FIELD_ID" >> $GITHUB_ENV
+                    echo "TITLE_FIELD_ID: $TITLE_FIELD_ID"
+                    
+                    DATE_FIELD_ID=$(jq -r '.data.user.projectV2.fields.nodes[] | select(.name=="Date Solved") | .id' project_data.json)
+                    echo "DATE_FIELD_ID=$DATE_FIELD_ID" >> $GITHUB_ENV
+                    echo "DATE_FIELD_ID: $DATE_FIELD_ID"
+                    
+                    STATUS_FIELD_ID=$(jq -r '.data.user.projectV2.fields.nodes[] | select(.name=="Status") | .id' project_data.json)
+                    echo "STATUS_FIELD_ID=$STATUS_FIELD_ID" >> $GITHUB_ENV
+                    echo "STATUS_FIELD_ID: $STATUS_FIELD_ID"
+                    
+                    DONE_OPTION_ID=$(jq -r '.data.user.projectV2.fields.nodes[] | select(.name=="Status") | .options[] | select(.name=="Done") | .id' project_data.json)
+                    echo "DONE_OPTION_ID=$DONE_OPTION_ID" >> $GITHUB_ENV
+                    echo "DONE_OPTION_ID: $DONE_OPTION_ID"
+
+            - name: Issue to Project Item
+              env:
+                  GH_TOKEN: ${{ secrets.ACC_TKN }}
+                  ISSUE_ID: ${{ github.event.issue.node_id }}
+              run: |
+                  echo "Project create start"
+                  # Project에 Item 생성
+                  echo $PROJECT_ID
+
+                  ITEM_ID=$(gh api graphql -f query='
+                      mutation($project:ID!, $issue:ID!) {
+                          addProjectV2ItemById(input: {projectId: $project, contentId:$issue}) {
+                              item {
+                                  id
+                              }
+                          }
+                      }' -f project=$PROJECT_ID -f issue=$ISSUE_ID --jq '.data.addProjectV2ItemById.item.id')
+                  echo $ITEM_ID
+                  echo "ITEM_ID=$ITEM_ID" >> $GITHUB_ENV
+
+            - name: Update Project Item
+              env:
+                  GH_TOKEN: ${{ secrets.ACC_TKN }}
+              run: |
+                  echo "Update project item start"
+                  # 해당 Item의 데이터 수정
+                  gh api graphql -f query='
+                  mutation($project:ID!, $item:ID!, $titleField:ID!, $titleValue:String!, $statusField:ID!, $statusValue:String!, $dateField:ID!, $dateValue:Date!) {
+                  updateTitle: updateProjectV2ItemFieldValue(input: {
+                      projectId: $project
+                      itemId: $item
+                      fieldId: $titleField
+                      value: {
+                          text: $titleValue
+                      }
+                      }) {
+                      projectV2Item {
+                          id
+                      }
+                  }
+                  updateStatus: updateProjectV2ItemFieldValue(input: {
+                      projectId: $project
+                      itemId: $item
+                      fieldId: $statusField
+                      value: {
+                          singleSelectOptionId: $statusValue
+                      }
+                      }) {
+                      projectV2Item {
+                          id
+                      }
+                  }
+                  updateDate: updateProjectV2ItemFieldValue(input: {
+                      projectId: $project
+                      itemId: $item
+                      fieldId: $dateField
+                      value: {
+                          date: $dateValue
+                      }
+                      }) {
+                      projectV2Item {
+                          id
+                      }
+                  }
+                  }' -f project=$PROJECT_ID -f item=$ITEM_ID -f titleField=$TITLE_FIELD_ID -f titleValue="${COMMIT_MESSAGE}" -f statusField=$STATUS_FIELD_ID -f statusValue=${DONE_OPTION_ID} -f dateField=$DATE_FIELD_ID -f dateValue="${COMMIT_DATE}" --silent
+                  echo "update Done"
