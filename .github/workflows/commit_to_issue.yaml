@@ -32,7 +32,6 @@ jobs:
                     if [[ $COMMIT_MESSAGE == [* ]]; then
                         echo "Creating issue for commit starting with ["
                         issue_response=$(gh issue create --title "$COMMIT_TITLE" --body "This issue was automatically generated from a commit.\n$COMMIT_BODY" --repo "${GITHUB_REPOSITORY}" --assignee @me --label "auto-generated")
-                        issue_number=$(echo "$issue_response" | jq -r .number)
-                        echo "Issue created with number: $issue_number"
+                        echo "Issue created: $issue_response"
                      fi
                    done
