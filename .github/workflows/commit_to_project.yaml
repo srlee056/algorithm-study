@@ -1,5 +1,5 @@
 # This workflow runs whenever a pull request in the repository is marked as "ready for review".
-name: Add Commit to
+name: Add Commit to Project
 on:
     push:
         branches:
@@ -7,10 +7,15 @@ on:
     workflow_dispatch:
 
 jobs:
-    track_pr:
+    track:
         runs-on: ubuntu-latest
         steps:
-            - name: Get project data
+            - name: Checkout repository
+              uses: actions/chcekout@v2
+              with:
+                  fetch-depth: 0 # 모든 커밋을 가져오기 위해
+
+            - name: Get project data and set up environment variables
               env:
                   GH_TOKEN: ${{ secrets.ACC_TKN }}
                   USER: srlee056
@@ -40,66 +45,65 @@ jobs:
                         }
                       }
                     }' -f user=$USER -F number=$PROJECT_NUMBER > project_data.json
+                  echo 'TITLE_FIELD_ID='$(jq '.data.user.projectV2.fields.nodes[] | select(.name== "Title") | .id' project_data.json) >> $GITHUB_ENV
                   echo 'PROJECT_ID='$(jq '.data.user.projectV2.id' project_data.json) >> $GITHUB_ENV
                   echo 'DATE_FIELD_ID='$(jq '.data.user.projectV2.fields.nodes[] | select(.name== "Date Solved") | .id' project_data.json) >> $GITHUB_ENV
                   echo 'STATUS_FIELD_ID='$(jq '.data.user.projectV2.fields.nodes[] | select(.name== "Status") | .id' project_data.json) >> $GITHUB_ENV
                   echo 'DONE_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .options[] | select(.name=="Done") |.id' project_data.json) >> $GITHUB_ENV
 
-            - name: Add PR to project
-              env:
-                  GH_TOKEN: ${{ secrets.ACC_TKN }}
-                  PR_ID: ${{ github.event.pull_request.node_id }}
+            - name: Process each commit
               run: |
-                  item_id="$( gh api graphql -f query='
-                    mutation($project:ID!, $pr:ID!) {
-                      addProjectV2ItemById(input: {projectId: $project, contentId: $pr}) {
-                        item {
-                          id
-                        }
-                      }
-                    }' -f project=$PROJECT_ID -f pr=$PR_ID --jq '.data.addProjectV2ItemById.item.id')"
-                    echo 'ITEM_ID='$item_id >> $GITHUB_ENV
+                  git log ${{ github.event.before }}..${{ github.event.after }} --format='%H' | while read commit_hash; do
+                    COMMIT_MESSAGE=$(git log -1 --format=%B $commit_hash)
+                    COMMIT_DATE=$(git log -1 --format=%cd --date=format:'%Y-%m-%d' $commit_hash)
+                    AUTHOR_NAME=$(git log -1 --format=%an $commit_hash)
 
-            # Saves the current date as an environment variable in `yyyy-mm-dd` format.
-            - name: Get date
-              run: echo "DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
+                    if [[ $COMMIT_MESSAGE == [* ]]; then
+                      # 환경 변수에 커밋 정보 설정
+                      echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> $GITHUB_ENV
+                      echo "COMMIT_DATE=$COMMIT_DATE" >> $GITHUB_ENV
+                      echo "AUTHOR_NAME=$AUTHOR_NAME" >> $GITHUB_ENV
 
-            # Sets environment variables for this step. Replace `YOUR_TOKEN` with the name of the secret that contains your personal access token.
-            - name: Set fields
-              env:
-                  GH_TOKEN: ${{ secrets.ACC_TKN }}
-              run: |
-                  gh api graphql -f query='
-                    mutation (
-                      $project: ID!
-                      $item: ID!
-                      $status_field: ID!
-                      $status_value: String!
-                      $date_field: ID!
-                      $date_value: Date!
-                    ) {
-                      set_status: updateProjectV2ItemFieldValue(input: {
+                      # GitHub CLI를 사용하여 프로젝트에 커밋 정보를 추가하는 부분
+                      # 각 커밋에 대해 이 부분을 실행합니다.
+                      gh api graphql -f query='
+                      mutation($project:ID!, $item:ID!, $titleField:ID!, $titleValue:String!, $statusField:ID!, $statusValue:String!, $dateField:ID!, $dateValue:Date!) {
+                        updateTitle: updateProjectV2ItemFieldValue(input: {
                         projectId: $project
                         itemId: $item
-                        fieldId: $status_field
+                        fieldId: $titleField
                         value: {
-                          singleSelectOptionId: $status_value
-                          }
-                      }) {
+                            text: $titleValue
+                        }
+                        }) {
                         projectV2Item {
-                          id
-                          }
-                      }
-                      set_date_posted: updateProjectV2ItemFieldValue(input: {
+                            id
+                        }
+                        }
+                        updateStatus: updateProjectV2ItemFieldValue(input: {
                         projectId: $project
                         itemId: $item
-                        fieldId: $date_field
+                        fieldId: $statusField
                         value: {
-                          date: $date_value
+                            singleSelectOptionId: $statusValue
                         }
-                      }) {
+                        }) {
                         projectV2Item {
-                          id
+                            id
                         }
-                      }
-                    }' -f project=$PROJECT_ID -f item=$ITEM_ID -f status_field=$STATUS_FIELD_ID -f status_value=${{ env.DONE_OPTION_ID }} -f date_field=$DATE_FIELD_ID -f date_value=$DATE --silent
+                        }
+                        updateDate: updateProjectV2ItemFieldValue(input: {
+                        projectId: $project
+                        itemId: $item
+                        fieldId: $dateField
+                        value: {
+                            date: $dateValue
+                        }
+                        }) {
+                        projectV2Item {
+                            id
+                        }
+                        }
+                      }' -f project=$PROJECT_ID -f item=$item_id -f titleField=$TITLE_FIELD_ID -f titleValue="${COMMIT_MESSAGE}" -f statusField=$STATUS_FIELD_ID -f statusValue=${DONE_OPTION_ID} -f dateField=$DATE_FIELD_ID -f dateValue="${COMMIT_DATE}" --silent
+                    fi
+                  done
