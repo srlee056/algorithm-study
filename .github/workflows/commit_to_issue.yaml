@@ -43,9 +43,10 @@ jobs:
                         
                         # Looping through each committed file to create a Markdown link
                         for file in $COMMITTED_FILES; do
+                            decoded_file=$(printf "%b" "$file")
                             # Replace this with your GitHub repository details
-                            file_url="https://github.com/$GITHUB_REPOSITORY/blob/$GITHUB_REF/$file"
-                            COMMITTED_FILES_LINKS+="- [$file]($file_url)\n"
+                            file_url="https://github.com/$GITHUB_REPOSITORY/blob/$GITHUB_REF/$decoded_file"
+                            COMMITTED_FILES_LINKS+="- [$decoded_file]($file_url)\n"
                         done
 
                         # Forming the issue body with the list of changed files
