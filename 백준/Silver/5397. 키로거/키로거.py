@@ -9,20 +9,19 @@ n = int(input())
 for _ in range(n):
     input_list = list(input().strip())
 
-    list_left_to_cursor, list_right_to_cursor = deque([]), deque([])
-    for i in input_list:
-        if i == "<":
-            if list_left_to_cursor:
-                temp_char = list_left_to_cursor.pop()
-                list_right_to_cursor.appendleft(temp_char)
-        elif i == ">":
-            if list_right_to_cursor:
-                temp_char = list_right_to_cursor.popleft()
-                list_left_to_cursor.append(temp_char)
-        elif i == "-":
-            if list_left_to_cursor:
-                list_left_to_cursor.pop()
+    cursor_left, cursor_right = deque([]), deque([])
+    for char in input_list:
+        if char == "<":
+            if cursor_left:
+                cursor_right.appendleft(cursor_left.pop())
+        elif char == ">":
+            if cursor_right:
+                cursor_left.append(cursor_right.popleft())
+        elif char == "-":
+            if cursor_left:
+                cursor_left.pop()
         else:
-            list_left_to_cursor.append(i)
-        # print(list_left_to_cursor, list_right_to_cursor)
-    print("".join(list_left_to_cursor + list_right_to_cursor))
+            cursor_left.append(char)
+
+    # 효율적인 문자열 합치기
+    print("".join(cursor_left) + "".join(cursor_right))
