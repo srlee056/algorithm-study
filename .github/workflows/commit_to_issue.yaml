@@ -34,7 +34,6 @@ jobs:
                         echo "문제: $problem_title"
                         echo "Creating issue for commit starting with ["
                         
-                        
                         COMMITTED_FILES=$(git diff-tree --no-commit-id --name-only -r $commit_hash)
                         echo $COMMITTED_FILES
                         
@@ -45,13 +44,28 @@ jobs:
                         for file in $COMMITTED_FILES; do
                             decoded_file=$(printf "%b" "$file")
                             # Replace this with your GitHub repository details
-                            file_url="https://github.com/$GITHUB_REPOSITORY/blob/$GITHUB_REF/$decoded_file"
+                            file_url="https://github.com/$GITHUB_REPOSITORY/blob/main/$decoded_file"
                             COMMITTED_FILES_LINKS+="- [$decoded_file]($file_url)\n"
                         done
 
+                        # Use gh issue list and grep to find an issue by title
+                        existing_issue=$(gh issue list --repo "$GITHUB_REPOSITORY" | grep "$problem_title" | awk '{print $1}')
+
+                        if [[ ! -z "$existing_issue" ]]; then
+                            echo "Issue already exists with title: $problem_title, Issue Number: $existing_issue"
+                            # Create a comment on the existing issue
+                            comment_body="A new commit has been made that references this issue.\n\n**Committed Files:**\n$COMMITTED_FILES_LINKS"
+                            gh issue comment $existing_issue --body "$comment_body" --repo "$GITHUB_REPOSITORY"
+                        else
+                            # No existing issue found, proceed to create a new issue
+                            issue_body=$(echo -e "This issue was automatically generated from a commit.\n\n**Committed Files:**\n$COMMITTED_FILES_LINKS")
+                            issue_response=$(gh issue create --title "$problem_title" --body "$issue_body" --repo "$GITHUB_REPOSITORY" --assignee @me --label "auto-generated")
+                            echo "New issue created: $issue_response"
+                        fi
+
                         # Forming the issue body with the list of changed files
                         issue_body=$(echo -e "This issue was automatically generated from a commit.\n\n**Commit Message:**\n$COMMIT_BODY\n\n**Committed Files:**\n$COMMITTED_FILES_LINKS")
-
+                        
                         issue_response=$(gh issue create --title "$problem_title" --body "$issue_body" --repo "${GITHUB_REPOSITORY}" --assignee @me --label "auto-generated")
                         echo "Issue created: $issue_response"
                     fi
