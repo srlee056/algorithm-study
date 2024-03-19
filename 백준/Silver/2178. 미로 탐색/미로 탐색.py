@@ -1,6 +1,8 @@
 import sys
 from collections import deque
 
+
+# bfs function
 def bfs(start_node, maze_array):
     n, m = len(maze_array), len(maze_array[0])
     dx = [-1, 1, 0, 0]
@@ -28,6 +30,7 @@ def bfs(start_node, maze_array):
 
     return -1
 
+
 def main():
     input = sys.stdin.readline
     n, m = map(int, input().split())
@@ -39,5 +42,6 @@ def main():
 
     print(bfs(deque([0, 0, 1]), maze_array))
 
+    
 if __name__ == "__main__":
     main()
