@@ -34,8 +34,10 @@ jobs:
                         echo "문제: $problem_title"
                         echo "Creating issue for commit starting with ["
                         
-                        COMMITTED_FILES=$(git diff-tree --no-commit-id --name-only -r $commit_hash)
+                        # remove double qoute using tr -d '"'
+                        COMMITTED_FILES=$(git diff-tree --no-commit-id --name-only -r $commit_hash | tr -d '"')
                         echo $COMMITTED_FILES
+
                         
                         # Initializing an empty string for the links
                         COMMITTED_FILES_LINKS=""
