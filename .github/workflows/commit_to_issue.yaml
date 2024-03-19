@@ -33,10 +33,23 @@ jobs:
                     elif [[ $COMMIT_TITLE == [* ]]; then
                         echo "문제: $problem_title"
                         echo "Creating issue for commit starting with ["
+                        
+                        
                         COMMITTED_FILES=$(git diff-tree --no-commit-id --name-only -r $commit_hash)
                         echo $COMMITTED_FILES
+                        
+                        # Initializing an empty string for the links
+                        COMMITTED_FILES_LINKS=""
+                        
+                        # Looping through each committed file to create a Markdown link
+                        for file in $COMMITTED_FILES; do
+                            # Replace this with your GitHub repository details
+                            file_url="https://github.com/$GITHUB_REPOSITORY/blob/$GITHUB_REF/$file"
+                            COMMITTED_FILES_LINKS+="- [$file]($file_url)\n"
+                        done
+
                         # Forming the issue body with the list of changed files
-                        issue_body=$(echo -e "This issue was automatically generated from a commit.\n\n**Commit Message:**\n$COMMIT_BODY\n\n**Committed Files:**\n$COMMITTED_FILES")
+                        issue_body=$(echo -e "This issue was automatically generated from a commit.\n\n**Commit Message:**\n$COMMIT_BODY\n\n**Committed Files:**\n$COMMITTED_FILES_LINKS")
 
                         issue_response=$(gh issue create --title "$problem_title" --body "$issue_body" --repo "${GITHUB_REPOSITORY}" --assignee @me --label "auto-generated")
                         echo "Issue created: $issue_response"
