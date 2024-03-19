@@ -6,7 +6,7 @@ input = sys.stdin.readline
 cursor_left = list(input().strip())
 cursor_right = deque([])
 
-# print(cursor_left)
+
 command_num = int(input())
 
 for _ in range(command_num):
