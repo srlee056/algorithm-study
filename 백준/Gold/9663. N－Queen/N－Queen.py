@@ -1,6 +1,6 @@
 import sys
 
-
+#
 def backtrack(n, col, rows, diagonals):
     if n == 1 and col == 0:
         return 1
