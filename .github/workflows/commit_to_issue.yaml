@@ -55,6 +55,7 @@ jobs:
                             if [[ "$decoded_file" == 백준/*/*README.md ]]; then
                                 # Assuming $decoded_file holds the path to the README.md file
                                 README_CONTENT=$(gh api repos/:owner/:repo/contents/$decoded_file --jq '.content' | base64 --decode)
+                                echo $README_CONTENT
                                 # Now you can process README_CONTENT with awk or other tools as needed
                                 LABELS=$(echo "$README_CONTENT" | awk '/### 분류/,/^$/ { if (!/### 분류/ && !/^$/) print }' | tr -d '\n' | sed 's/, /,/g')
 
