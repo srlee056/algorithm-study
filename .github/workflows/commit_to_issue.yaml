@@ -76,8 +76,7 @@ jobs:
                         done
 
                         # Use gh issue list and grep to find an issue by title
-                        # existing_issue=$(gh issue list --repo "$GITHUB_REPOSITORY" | grep "$problem_title" | awk '{print $1}')
-                        existing_issue=$(gh issue list --repo "$GITHUB_REPOSITORY" | awk -v title="$problem_title" '$0 ~ title {print $1}')
+                        existing_issue=$(gh issue list --repo "$GITHUB_REPOSITORY" | grep -w "$problem_title" | awk '{print $1}')
 
                         if [[ ! -z "$existing_issue" ]]; then
                             echo "Issue already exists with title: $problem_title, Issue Number: $existing_issue"
