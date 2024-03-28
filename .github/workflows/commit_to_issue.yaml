@@ -64,7 +64,9 @@ jobs:
 
                                 echo $LABELS
                                 # Convert labels into format suitable for `gh issue create` command
-                                GH_LABELS=$(echo $LABELS | tr ',' '\n' | awk '{gsub(/^ +| +$/,""); gsub(/ /,"-"); printf "--label \"%s\" ", $0}')
+                                
+                                GH_LABELS=$(echo $LABELS | tr ',' '\n' | sed 's/ /-/g' | sed 's/^-//;s/-$//' | awk '{printf "--label \"%s\" ", $0}')
+
                                 echo $GH_LABELS
                                 break # Assuming only one README.md is relevant per commit
                             fi
@@ -82,7 +84,7 @@ jobs:
                             # 라벨이 존재하는지 확인하고, 없으면 생성
                             for label in $(echo $LABELS | tr ',' '\n' | sed 's/ /-/g' | sed 's/^-//;s/-$//'); do
                                 # 'gh label view'로 라벨 존재 여부 확인
-                                if ! gh label view "$label" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+                                if ! gh label view $label --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
                                     # 라벨이 존재하지 않으면 생성
                                     gh label create "$label" --description "Automatically created label" --repo "$GITHUB_REPOSITORY"
                                 fi
