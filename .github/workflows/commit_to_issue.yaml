@@ -3,6 +3,9 @@ on:
     push:
         branches:
             - main
+        paths:
+            - '백준/**'
+            - '프로그래머스/**'
     workflow_dispatch:
 
 jobs:
@@ -84,10 +87,11 @@ jobs:
                             # 라벨이 존재하는지 확인하고, 없으면 생성
                             for label in $(echo $LABELS | tr ',' '\n' | sed 's/ /-/g' | sed 's/^-//;s/-$//'); do
                                 # 'gh label view'로 라벨 존재 여부 확인
-                                exist = $(gh label view $label --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1)
+                                gh label view "$label" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1
+                                exist=$?
+
                                 echo $exist
-                                if ! gh label view $label --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
-                                    
+                                if [ $exist -ne 0 ]; then
                                     # 라벨이 존재하지 않으면 생성
                                     gh label create "$label" --description "Automatically created label" --repo "$GITHUB_REPOSITORY"
                                 fi
