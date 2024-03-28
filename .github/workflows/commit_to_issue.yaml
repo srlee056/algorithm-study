@@ -49,6 +49,20 @@ jobs:
                             COMMITTED_FILES_LINKS+="- [$decoded_file]($file_url)\n"
                         done
 
+                        for file in $COMMITTED_FILES; do
+                            # Check if the file is a README.md in the specific path
+                            decoded_file=$(printf "%b" "$file")
+                            if [[ "$decoded_file" == 백준/*/*README.md ]]; then
+                                # Extract labels from README.md
+                                LABELS=$(awk '/### 분류/,/^$/ { if (!/### 분류/ && !/^$/) print }' "$decoded_file" | tr -d '\n' | sed 's/, /,/g')
+
+                                # Convert labels into format suitable for `gh issue create` command
+                                GH_LABELS=$(echo $LABELS | tr ',' '\n' | awk '{printf "--label \"%s\" ", $0}')
+
+                                break # Assuming only one README.md is relevant per commit
+                            fi
+                        done
+
                         # Use gh issue list and grep to find an issue by title
                         existing_issue=$(gh issue list --repo "$GITHUB_REPOSITORY" | grep "$problem_title" | awk '{print $1}')
 
