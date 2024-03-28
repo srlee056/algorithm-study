@@ -58,7 +58,7 @@ jobs:
                                 echo $README_CONTENT
                                 # Now you can process README_CONTENT with awk or other tools as needed
                                 LABELS=$(echo "$README_CONTENT" | awk '/### 분류/,/^$/ { if (!/### 분류/ && !/^$/) print }' | tr -d '\n' | sed 's/, /,/g')
-
+                                echo $LABELS
                                 # Convert labels into format suitable for `gh issue create` command
                                 GH_LABELS=$(echo $LABELS | tr ',' '\n' | awk '{printf "--label \"%s\" ", $0}')
                                 echo $GH_LABELS
