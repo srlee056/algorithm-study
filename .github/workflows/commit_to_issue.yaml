@@ -53,8 +53,10 @@ jobs:
                             # Check if the file is a README.md in the specific path
                             decoded_file=$(printf "%b" "$file")
                             if [[ "$decoded_file" == 백준/*/*README.md ]]; then
-                                # Extract labels from README.md
-                                LABELS=$(awk '/### 분류/,/^$/ { if (!/### 분류/ && !/^$/) print }' "$decoded_file" | tr -d '\n' | sed 's/, /,/g')
+                                # Assuming $decoded_file holds the path to the README.md file
+                                README_CONTENT=$(gh api repos/:owner/:repo/contents/$decoded_file --jq '.content' | base64 --decode)
+                                # Now you can process README_CONTENT with awk or other tools as needed
+                                LABELS=$(echo "$README_CONTENT" | awk '/### 분류/,/^$/ { if (!/### 분류/ && !/^$/) print }' | tr -d '\n' | sed 's/, /,/g')
 
                                 # Convert labels into format suitable for `gh issue create` command
                                 GH_LABELS=$(echo $LABELS | tr ',' '\n' | awk '{printf "--label \"%s\" ", $0}')
