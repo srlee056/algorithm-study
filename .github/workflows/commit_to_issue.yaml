@@ -57,7 +57,11 @@ jobs:
                                 README_CONTENT=$(gh api repos/:owner/:repo/contents/$decoded_file --jq '.content' | base64 --decode)
                                 echo $README_CONTENT
                                 # Now you can process README_CONTENT with awk or other tools as needed
-                                LABELS=$(echo "$README_CONTENT" | awk '/###분류/{getline; print; getline; print}' | tr -d '\n')
+                                LABELS=$(echo "$README_CONTENT" | awk '{
+                                    match($0, /### 분류 ([^#]+) ###/, arr);
+                                    if (arr[1] != "") print arr[1];
+                                }')
+
                                 echo $LABELS
                                 # Convert labels into format suitable for `gh issue create` command
                                 GH_LABELS=$(echo $LABELS | tr ',' '\n' | awk '{printf "--label \"%s\" ", $0}')
