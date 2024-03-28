@@ -57,7 +57,7 @@ jobs:
                                 README_CONTENT=$(gh api repos/:owner/:repo/contents/$decoded_file --jq '.content' | base64 --decode)
                                 echo $README_CONTENT
                                 # Now you can process README_CONTENT with awk or other tools as needed
-                                LABELS=$(echo "$README_CONTENT" | awk '/### 분류/,/^$/ { if (!/### 분류/ && !/^$/) print }' | tr -d '\n' | sed 's/, /,/g')
+                                LABELS=$(echo "$README_CONTENT" | awk '/###분류/{getline; print; getline; print}' | tr -d '\n')
                                 echo $LABELS
                                 # Convert labels into format suitable for `gh issue create` command
                                 GH_LABELS=$(echo $LABELS | tr ',' '\n' | awk '{printf "--label \"%s\" ", $0}')
@@ -75,9 +75,17 @@ jobs:
                             comment_body=$(echo -e "A new commit has been made that references this issue.\n\n**Committed Files:**\n$COMMITTED_FILES_LINKS")
                             gh issue comment $existing_issue --body "$comment_body" --repo "$GITHUB_REPOSITORY"
                         else
+                            # 라벨이 존재하는지 확인하고, 없으면 생성
+                            for label in $(echo $LABELS | tr ',' '\n'); do
+                                # gh label view로 라벨 존재 여부 확인
+                                if ! gh label view "$label" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+                                    # 라벨이 존재하지 않으면 생성
+                                    gh label create "$label" --description "Automatically created label" --repo "$GITHUB_REPOSITORY"
+                                fi
+                            done
                             # No existing issue found, proceed to create a new issue
                             issue_body=$(echo -e "This issue was automatically generated from a commit.\n\n**Committed Files:**\n$COMMITTED_FILES_LINKS")
-                            issue_response=$(gh issue create --title "$problem_title" --body "$issue_body" --repo "$GITHUB_REPOSITORY" --assignee @me --label "auto-generated")
+                            issue_response=$(gh issue create --title "$problem_title" --body "$issue_body" $GH_LABELS --repo "$GITHUB_REPOSITORY" --assignee @me --label "auto-generated")
                             echo "New issue created: $issue_response"
                         fi
                     fi
