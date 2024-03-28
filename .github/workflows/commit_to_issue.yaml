@@ -80,7 +80,7 @@ jobs:
                             gh issue comment $existing_issue --body "$comment_body" --repo "$GITHUB_REPOSITORY"
                         else
                             # 라벨이 존재하는지 확인하고, 없으면 생성
-                            for label in $(echo $LABELS | tr ',' '\n'); do
+                            for label in $(echo $LABELS | tr ', ' '\n'); do
                                 # gh label view로 라벨 존재 여부 확인
                                 if ! gh label view "$label" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
                                     # 라벨이 존재하지 않으면 생성
@@ -89,7 +89,7 @@ jobs:
                             done
                             # No existing issue found, proceed to create a new issue
                             issue_body=$(echo -e "This issue was automatically generated from a commit.\n\n**Committed Files:**\n$COMMITTED_FILES_LINKS")
-                            issue_response=$(gh issue create --title "$problem_title" --body "$issue_body" $GH_LABELS --repo "$GITHUB_REPOSITORY" --assignee @me --label "auto-generated")
+                            issue_response=$(gh issue create --title "$problem_title" --body "$issue_body" --repo "$GITHUB_REPOSITORY" --assignee @me $GH_LABELS --label "auto-generated")
                             echo "New issue created: $issue_response"
                         fi
                     fi
