@@ -84,17 +84,23 @@ jobs:
                             comment_body=$(echo -e "A new commit has been made that references this issue.\n\n**Committed Files:**\n$COMMITTED_FILES_LINKS")
                             gh issue comment $existing_issue --body "$comment_body" --repo "$GITHUB_REPOSITORY"
                         else
-                            gh label list
-                            # 라벨이 존재하는지 확인하고, 없으면 생성
+                            # 먼저 현재 리포지토리의 모든 라벨을 가져옵니다.
+                            existing_labels=$(gh label list --repo "$GITHUB_REPOSITORY" | cut -f1)
+
+                            # 라벨이 존재하는지 확인하고, 없으면 생성합니다.
                             for label in $(echo $LABELS | tr ',' '\n' | sed 's/ /-/g' | sed 's/^-//;s/-$//'); do
-                                # 'gh label view'로 라벨 존재 여부 확인. 라벨이 존재하지 않으면 생성 로직 수행
-                                if ! gh label view "$label" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+                                # echo 명령을 사용하여 현재 처리 중인 라벨을 출력할 수 있습니다.
+                                echo "Processing label: $label"
+                                
+                                # 현재 라벨이 이미 존재하는 라벨 목록에 있는지 확인합니다.
+                                if ! grep -q "^$label$" <<< "$existing_labels"; then
                                     echo "Creating label: $label"
                                     gh label create "$label" --description "Automatically created label" --repo "$GITHUB_REPOSITORY"
                                 else
                                     echo "Label already exists: $label"
                                 fi
                             done
+
 
 
                             # No existing issue found, proceed to create a new issue
