@@ -57,7 +57,7 @@ jobs:
                                 README_CONTENT=$(gh api repos/:owner/:repo/contents/$decoded_file --jq '.content' | base64 --decode)
                                 echo $README_CONTENT
                                 # Now you can process README_CONTENT with awk or other tools as needed
-                                LABELS=$(echo "$README_CONTENT" | awk '{
+                                LABELS=$(echo $README_CONTENT | awk '{
                                     match($0, /### 분류 ([^#]+) ###/, arr);
                                     if (arr[1] != "") print arr[1];
                                 }')
