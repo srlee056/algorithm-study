@@ -3,13 +3,12 @@ import sys
 n = int(sys.stdin.readline())
 
 
-num_dict = {}
+nums = [0 for _ in range(10001)]
 for _ in range(n):
     m = int(sys.stdin.readline())
-    num_dict[m] = num_dict.get(m, 0) + 1
+    nums[m] += 1
 
 
-for i in range(1, 10001):
-    if i in num_dict:
-        for _ in range(num_dict[i]):
-            print(i)
+for i, num in enumerate(nums):
+    for _ in range(num):
+        print(i)
