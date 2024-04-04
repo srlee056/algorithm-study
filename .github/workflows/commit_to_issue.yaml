@@ -95,7 +95,7 @@ jobs:
                                 # 현재 라벨이 이미 존재하는 라벨 목록에 있는지 확인합니다.
                                 if ! grep -q "^$label$" <<< "$existing_labels"; then
                                     echo "Creating label: $label"
-                                    gh label create "$label" --description "Automatically created label" --repo "$GITHUB_REPOSITORY"
+                                    gh label create "$label" --force --description "Automatically created label" --repo "$GITHUB_REPOSITORY"
                                 else
                                     echo "Label already exists: $label"
                                 fi
