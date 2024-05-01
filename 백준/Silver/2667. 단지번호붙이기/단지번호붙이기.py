@@ -1,38 +1,51 @@
-from sys import stdin
-from collections import deque
-
-n = int(stdin.readline())
+import sys
+from collections import defaultdict, deque
 
 
-arr = []
-for _ in range(n):
-    arr.append(list(map(int, list(stdin.readline().strip()))))
-# print(arr)
-dx = [0, 0, 1, -1]
-dy = [1, -1, 0, 0]
+def main():
 
-counts = []
-for i in range(n):
-    for j in range(n):
-        if arr[i][j] == 1:
-            count = 0
-            queue = deque([(i, j)])
-            arr[i][j] = 0
-            while queue:
-                y, x = queue.popleft()
-                count += 1
-                for k in range(4):
-                    if (
-                        0 <= y + dy[k] < n
-                        and 0 <= x + dx[k] < n
-                        and arr[y + dy[k]][x + dx[k]] == 1
-                    ):
-                        queue.append((y + dy[k], x + dx[k]))
-                        arr[y + dy[k]][x + dx[k]] = 0
+    n = int(sys.stdin.readline().strip())
 
-            counts.append(count)
-counts.sort()
+    arr = []
+    for _ in range(n):
+        row = list(map(int, list(sys.stdin.readline().strip())))
+        arr.append(row)
 
-print(len(counts))
-for c in counts:
-    print(c)
+    visited = [[False] * n for _ in range(n)]
+    number_of_apts = []
+    for i in range(n):
+        for j in range(n):
+            if arr[i][j] == 1 and not visited[i][j]:
+                number_of_apts.append(find_connected_cells(arr, visited, i, j))
+
+    print(len(number_of_apts))
+    for number in sorted(number_of_apts):
+        print(number)
+
+    # return count
+
+
+def find_connected_cells(arr, visited, i, j):
+    n = len(arr)
+
+    directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+
+    queue = deque([(i, j)])
+    visited[i][j] = True
+    count = 1
+    while queue:
+        y, x = queue.popleft()
+
+        for dy, dx in directions:
+            ny, nx = y + dy, x + dx
+            if 0 <= ny < n and 0 <= nx < n:
+                if arr[ny][nx] == 1 and not visited[ny][nx]:
+                    visited[ny][nx] = True
+                    queue.append((ny, nx))
+                    count += 1
+
+    return count
+
+
+if __name__ == "__main__":
+    main()
