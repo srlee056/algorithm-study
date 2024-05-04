@@ -23,7 +23,7 @@ def main():
     for n, d in dist_arr[start_node].items():
         heapq.heappush(heap, (d, n))
 
-    while True:
+    while heap:
         # find not visited, min_dist node
         if heap:
             min_dist, min_node = heapq.heappop(heap)
@@ -32,19 +32,18 @@ def main():
         if visited[min_node]:
             continue
         # print("cur, min node", start_node, min_node)
-        if min_node != -1:
-            visited[min_node] = True
-            for node_, dist_ in dist_arr[min_node].items():
-                if (
-                    node_ in dist_arr[start_node]
-                    and dist_arr[start_node][node_] < dist_ + min_dist
-                ):
-                    pass
-                else:
-                    dist_arr[start_node][node_] = dist_ + min_dist
-                    heapq.heappush(heap, (dist_arr[start_node][node_], node_))
-        else:
-            break
+
+        visited[min_node] = True
+        for node_, dist_ in dist_arr[min_node].items():
+            if (
+                node_ in dist_arr[start_node]
+                and dist_arr[start_node][node_] < dist_ + min_dist
+            ):
+                pass
+            else:
+                dist_arr[start_node][node_] = dist_ + min_dist
+                heapq.heappush(heap, (dist_arr[start_node][node_], node_))
+
     for i in range(v):
         if i == start_node:
             print(0)
