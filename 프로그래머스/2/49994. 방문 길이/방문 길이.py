@@ -1,26 +1,23 @@
 def solution(dirs):
-    answer = 0
     
-    visited = {}
-    for i in range(-5, 6):
-        for j in range(-5, 6):
-            visited[(i, j)] = []
-    
+    directions = {'U':(0, 1), 'D':(0,-1), 'R':(1, 0), 'L':(-1, 0)}
     
     x, y = 0, 0
-    dirD = {'U':[0, 1], 'D':[0, -1], 'L': [-1, 0], 'R':[1, 0]}
-    oppdirD = {'U':'D', 'D':'U', 'L': 'R', 'R':'L'}
+    visited_paths = set()
     count = 0
-    for d in dirs:
-        a, b = dirD[d]
-        #print(x, y, d)
-        if x+a in range(-5, 6) and y+b in range(-5, 6):
-            #print(x, y, x+a, y+b, d)
-            if d not in visited[x,y]:
-                visited[(x, y)].append(d)
-                visited[(x+a, y+b)].append(oppdirD[d])
-                count += 1 
-            x, y = x+a, y+b
-    #print(count)
+    for dir in dirs:
+        dx, dy = directions[dir]
+        nx, ny = x + dx, y + dy
+        
+        if -5 <= nx <= 5 and -5 <= ny <= 5:
+            path = ((x,y), (nx, ny))
+            opposite_path = ((nx, ny), (x, y))
+
+            if path not in visited_paths and opposite_path not in visited_paths:
+                visited_paths.add(path)
+                count += 1
+
+            x, y = nx, ny
+
         
     return count
